@@ -155,13 +155,13 @@ tasks:
             cli_binary="encore{{.VERSION_SUFFIX}}"
             ;;
           linux-amd64)
-            rust_target="x86_64-unknown-linux-gnu"
+            rust_target="x86_64-unknown-linux-musl"
             js_binary="libencore_js_runtime.so"
             ts_binary="tsparser-encore"
             cli_binary="encore{{.VERSION_SUFFIX}}"
             ;;
           linux-arm64)
-            rust_target="aarch64-unknown-linux-gnu"
+            rust_target="aarch64-unknown-linux-musl"
             js_binary="libencore_js_runtime.so"
             ts_binary="tsparser-encore"
             cli_binary="encore{{.VERSION_SUFFIX}}"

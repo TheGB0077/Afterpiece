@@ -1,20 +1,31 @@
-version: '3'
+version: "3"
 
 includes:
   common: ../Taskfile.yml
 
 tasks:
-  # Main Windows build
   build:
-    summary: Builds Encore for Windows
+    summary: Builds all Windows binaries
     deps:
-      - task: common:go:mod:tidy
-      - task: download:runtimes
+      - task: setup
+    cmds:
+      - task: build:components
       - task: build:tsparser
       - task: build:js:runtimes
-    cmds:
       - task: build:amd64
-      - task: build:components
+
+  setup:
+    internal: true
+    deps:
+      - task: common:setup
+    cmds:
+      - task: install:targets
+      - task: download:runtimes
+
+  install:targets:
+    summary: Installs Windows Rust targets
+    cmds:
+      - rustup target add x86_64-pc-windows-gnu
 
   # Windows CLI build
   build:amd64:
@@ -35,19 +46,14 @@ tasks:
   # TS parser for Windows
   build:tsparser:
     summary: Builds TS parser for Windows
-    deps:
-      - task: common:setup
     cmds:
       - task: common:build:rust:tsparser
         vars:
           TARGET: x86_64-pc-windows-gnu
 
-
   # JS runtime for Windows
   build:js:runtimes:
     summary: Builds JS runtime for Windows
-    deps:
-      - task: common:setup
     cmds:
       - task: common:build:js:runtime
         vars:
@@ -56,8 +62,6 @@ tasks:
           TARGET: x86_64-pc-windows-gnu
           OUTPUT_DIR: "{{.BIN_DIR}}"
 
-
-  # Windows runtime downloads
   download:runtimes:
     summary: Downloads Windows runtimes
     internal: true

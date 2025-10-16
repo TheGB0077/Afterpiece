@@ -19,7 +19,7 @@ jobs:
       matrix:
         include:
           - { platform: linux, os: ubuntu-24.04 }
-          - { platform: windows, os: windows-latest }
+          - { platform: windows, os: ubuntu-24.04 }
           - { platform: darwin, os: macos-11 }
 
     runs-on: ${{ matrix.os }}

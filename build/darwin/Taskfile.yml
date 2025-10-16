@@ -5,22 +5,33 @@ includes:
 
 tasks:
   build:
-    summary: Builds complete macOS distributions
+    summary: Builds all macOS binaries
     deps:
-      - task: common:go:mod:tidy
-      - task: download:runtimes
+      - task: setup
+    cmds:
+      - task: build:components
       - task: build:tsparser
       - task: build:js:runtimes
-    cmds:
       - task: build:amd64
       - task: build:arm64
       - task: create:universal
-      - task: build:components
+
+  setup:
+    internal: true
+    deps:
+      - task: common:setup
+    cmds:
+      - task: install:targets
+      - task: download:runtimes
+
+  install:targets:
+    summary: Installs macOS Rust targets
+    cmds:
+      - rustup target add x86_64-apple-darwin
+      - rustup target add aarch64-apple-darwin
 
   build:tsparser:
     summary: Builds TS parser for macOS architectures
-    deps:
-      - task: common:setup
     cmds:
       - task: common:build:rust:tsparser
         vars:
@@ -32,8 +43,6 @@ tasks:
 
   build:js:runtimes:
     summary: Builds JS runtimes for macOS
-    deps:
-      - task: common:setup
     cmds:
       - task: common:build:js:runtime
         vars:
@@ -49,7 +58,6 @@ tasks:
           OUTPUT_DIR: "{{.BIN_DIR}}"
 
 
-  # Download macOS runtimes
   download:runtimes:
     summary: Downloads macOS runtimes
     internal: true

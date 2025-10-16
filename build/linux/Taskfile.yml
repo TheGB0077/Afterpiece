@@ -5,48 +5,55 @@ includes:
 
 tasks:
   build:
-    summary: Builds complete Linux distributions
+    summary: Builds all Linux binaries
     deps:
-      - task: common:go:mod:tidy
-      - task: download:runtimes
+      - task: setup
+    cmds:
       - task: build:tsparser
       - task: build:js:runtimes
-    cmds:
       - task: build:amd64
       - task: build:arm64
       - task: build:components
 
-  build:tsparser:
-    summary: Builds TS parser for Linux architectures
+  setup:
+    internal: true
     deps:
       - task: common:setup
     cmds:
-      - task: common:build:rust:tsparser
-        vars:
-          TARGET: x86_64-unknown-linux-gnu.2.31
-      - task: common:build:rust:tsparser
-        vars:
-          TARGET: aarch64-unknown-linux-gnu.2.31
+      - task: install:targets
+      - task: download:runtimes
 
+  install:targets:
+    summary: Installs Linux Rust targets
+    cmds:
+      - rustup target add x86_64-unknown-linux-musl
+      - rustup target add aarch64-unknown-linux-musl
+
+  build:tsparser:
+    summary: Builds TS parser for Linux architectures
+    cmds:
+      - task: common:build:rust:tsparser
+        vars:
+          TARGET: x86_64-unknown-linux-musl
+      - task: common:build:rust:tsparser
+        vars:
+          TARGET: aarch64-unknown-linux-musl
 
   build:js:runtimes:
     summary: Builds JS runtimes for Linux
-    deps:
-      - task: common:setup
     cmds:
       - task: common:build:js:runtime
         vars:
           OS: linux
           ARCH: amd64
-          TARGET: x86_64-unknown-linux-gnu
+          TARGET: x86_64-unknown-linux-musl
           OUTPUT_DIR: "{{.BIN_DIR}}"
       - task: common:build:js:runtime
         vars:
           OS: linux
           ARCH: arm64
-          TARGET: aarch64-unknown-linux-gnu
+          TARGET: aarch64-unknown-linux-musl
           OUTPUT_DIR: "{{.BIN_DIR}}"
-
 
   # Download Linux runtimes
   download:runtimes:
