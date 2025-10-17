@@ -70,7 +70,9 @@ tasks:
         if [ ! -d "runtimes/windows_amd64/encore-go" ]; then
           echo "Downloading encore-go for windows_amd64"
           mkdir -p runtimes/windows_amd64
-          curl --fail -L "https://github.com/encoredev/go/releases/download/{{.ENCORE_GO_VERSION}}/windows_x86-64.tar.gz" | tar -C runtimes/windows_amd64 -xzf -
+          curl --fail -L "https://github.com/encoredev/go/releases/download/{{.ENCORE_GO_VERSION}}/windows_x86-64.tar.gz" -o temp-windows.tar.gz
+          tar -xzf temp-windows.tar.gz -C runtimes/windows_amd64
+          rm temp-windows.tar.gz
         else
           echo "encore-go already exists for windows_amd64"
         fi
