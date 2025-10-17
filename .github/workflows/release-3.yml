@@ -3,7 +3,7 @@ name: Release 3
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
     inputs:
       version:
@@ -20,7 +20,7 @@ jobs:
         include:
           - { platform: linux, os: ubuntu-24.04 }
           - { platform: windows, os: windows-latest }
-          - { platform: darwin, os: macos-11 }
+          - { platform: darwin, os: macos-15 }
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -96,7 +96,7 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref_type == 'tag'  # Only create releases for tags
+    if: github.ref_type == 'tag' # Only create releases for tags
     steps:
       - name: Extract version from tag
         id: version
@@ -116,12 +116,12 @@ jobs:
       - name: Find and organize release assets
         run: |
           mkdir -p release-assets
-          
+
           # Find the existing archives created by the Taskfile
           # The Taskfile creates: encore-{version}-{platform}.{ext}
           find artifacts -name "encore-${{ steps.version.outputs.version }}-*.tar.gz" -exec cp {} release-assets/ \;
           find artifacts -name "encore-${{ steps.version.outputs.version }}-*.zip" -exec cp {} release-assets/ \;
-          
+
           # List what we found for debugging
           echo "Found release assets:"
           ls -la release-assets/
@@ -133,20 +133,20 @@ jobs:
           name: Encore ${{ steps.version.outputs.version }}
           body: |
             ## Encore ${{ steps.version.outputs.version }}
-            
+
             ### Installation
             ```bash
             # Install Encore CLI
             curl -L https://github.com/encoredev/encore/releases/download/v${{ steps.version.outputs.version }}/install.sh | bash
             ```
-            
+
             ### Downloads
             - **Linux AMD64**: `encore-${{ steps.version.outputs.version }}-linux_amd64.tar.gz`
             - **Linux ARM64**: `encore-${{ steps.version.outputs.version }}-linux_arm64.tar.gz`
             - **macOS AMD64**: `encore-${{ steps.version.outputs.version }}-darwin_amd64.tar.gz`
             - **macOS ARM64**: `encore-${{ steps.version.outputs.version }}-darwin_arm64.tar.gz`
-            - **Windows**: `encore-${{ steps.version.outputs.version }}-windows_amd64.tar.gz` (and `.zip`)
-            
+            - **Windows**: `encore-${{ steps.version.outputs.version }}-windows_amd64.zip`
+
             ### Changelog
             TODO: Add changelog entries
           files: |
