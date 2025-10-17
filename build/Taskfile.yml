@@ -205,7 +205,7 @@ tasks:
     summary: Creates tar.gz archive from assembled distribution
     internal: true
     cmds:
-      - tar -C {{.ARCHIVE_DIR}} -czf {{.ARCHIVE_NAME}} .
+      - cd {{.ARCHIVE_DIR}} && tar -czf {{.ARCHIVE_NAME}} .
     vars:
       ARCHIVE_DIR: "{{.ARCHIVE_DIR}}"
       ARCHIVE_NAME: "{{.ARCHIVE_NAME}}"
@@ -239,7 +239,7 @@ tasks:
     summary: Creates archive from assembled distribution
     internal: true
     cmds:
-      - tar -C {{.ARCHIVE_DIR}} -czf {{.ARCHIVE_NAME}} .
+      - cd {{.ARCHIVE_DIR}} && tar -czf {{.ARCHIVE_NAME}} .
     vars:
       ARCHIVE_DIR: "{{.ARCHIVE_DIR}}"
       ARCHIVE_NAME: "{{.ARCHIVE_NAME}}"
