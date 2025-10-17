@@ -9,18 +9,18 @@ on:
       version:
         description: 'Version to build ("1.2.3")'
         required: true
-      encorego_version:
-        description: 'Encore-Go version to use ("encore-go1.23.0")'
-        required: true
+
 
 jobs:
   build:
     strategy:
       matrix:
         include:
-          - { platform: linux, os: ubuntu-24.04 }
-          - { platform: windows, os: windows-latest }
-          - { platform: darwin, os: macos-15 }
+          - { platform: linux, os: ubuntu-24.04, arch: amd64 }
+          - { platform: linux, os: ubuntu-24.04, arch: arm64 }
+          - { platform: windows, os: windows-latest, arch: amd64 }
+          - { platform: darwin, os: macos-15, arch: amd64 }
+          - { platform: darwin, os: macos-15, arch: arm64 }
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -85,12 +85,26 @@ jobs:
         env:
           VERSION: "${{ steps.version.outputs.version }}"
 
+      - name: Create archives
+        shell: bash
+        run: |
+          cd dist/encore-${{ matrix.platform }}_${{ matrix.arch }}
+          
+          # Create tar.gz with version in name for all platforms
+          tar -czf ../../encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}_${{ matrix.arch }}.tar.gz .
+          
+          # Create zip for Windows with version in name
+          if [[ "${{ matrix.platform }}" == "windows" ]]; then
+            zip -r ../../encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}_${{ matrix.arch }}.zip .
+          fi
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: encore-${{ matrix.platform }}_${{ matrix.arch }}
           path: |
-            dist/
+            encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}_${{ matrix.arch }}.tar.gz
+            encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}_${{ matrix.arch }}.zip
           retention-days: 30
 
   release:
@@ -113,17 +127,20 @@ jobs:
           pattern: encore-*
           merge-multiple: true
 
-      - name: Find and organize release assets
+      - name: Organize release assets
         run: |
           mkdir -p release-assets
-
-          # Find the existing archives created by the Taskfile
-          # The Taskfile creates: encore-{version}-{platform}.{ext}
-          find artifacts -name "encore-${{ steps.version.outputs.version }}-*.tar.gz" -exec cp {} release-assets/ \;
-          find artifacts -name "encore-${{ steps.version.outputs.version }}-*.zip" -exec cp {} release-assets/ \;
-
-          # List what we found for debugging
-          echo "Found release assets:"
+          
+          # Move archives to release-assets (already correctly named)
+          mv artifacts/encore-${{ steps.version.outputs.version }}-*.tar.gz release-assets/ 2>/dev/null || true
+          mv artifacts/encore-${{ steps.version.outputs.version }}-*.zip release-assets/ 2>/dev/null || true
+          
+          # Create checksums
+          cd release-assets
+          sha256sum * > checksums.txt
+          cd ..
+          
+          echo "Release assets ready:"
           ls -la release-assets/
 
       - name: Create GitHub Release
@@ -145,7 +162,7 @@ jobs:
             - **Linux ARM64**: `encore-${{ steps.version.outputs.version }}-linux_arm64.tar.gz`
             - **macOS AMD64**: `encore-${{ steps.version.outputs.version }}-darwin_amd64.tar.gz`
             - **macOS ARM64**: `encore-${{ steps.version.outputs.version }}-darwin_arm64.tar.gz`
-            - **Windows**: `encore-${{ steps.version.outputs.version }}-windows_amd64.zip`
+            - **Windows**: `encore-${{ steps.version.outputs.version }}-windows_amd64.tar.gz` (and `.zip`)
 
             ### Changelog
             TODO: Add changelog entries
