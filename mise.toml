@@ -19,12 +19,11 @@ golangci-lint = "latest"
 
 # Platform-specific tools
 [tools.zig]
-os = ["linux", "windows"]
-version = "0.10.1"
-
-[tools.zig.macos]
-# Pinned for macOS compatibility
 version = "0.9.1"
+
+# [tools.zig.macos]
+# # Pinned for macOS compatibility
+# version = "0.9.1"
 
 [tasks]
 [tasks.build]
