@@ -1,4 +1,4 @@
-name: Release
+name: Release 3
 
 on:
   push:
@@ -34,6 +34,7 @@ jobs:
         run: mise install
 
       - name: Extract version from tag
+        shell: bash
         id: version
         run: |
           if [[ "${{ github.ref_type }}" == "tag" ]]; then
@@ -46,37 +47,50 @@ jobs:
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "Using version from input: $VERSION"
           fi
-        shell: bash
 
-      - name: Determine Encore-Go version
-        id: encorego
-        run: |
-          if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            ENCOREGO_VERSION="encore-go1.23.0"
-            echo "encorego_version=$ENCOREGO_VERSION" >> $GITHUB_OUTPUT
-            echo "Using default Encore-Go version: $ENCOREGO_VERSION"
-          else
-            ENCOREGO_VERSION="${{ github.event.inputs.encorego_version }}"
-            echo "encorego_version=$ENCOREGO_VERSION" >> $GITHUB_OUTPUT
-            echo "Using Encore-Go version from input: $ENCOREGO_VERSION"
-          fi
+      - name: Download Encore-Go
         shell: bash
+        run: |
+          echo "Downloading latest Encore-Go fork for ${{ matrix.platform }}_${{ matrix.arch }}"
+
+          # Create encore-go directory and download the fork
+          mkdir -p encore-go
+
+          # Determine the asset name based on platform and architecture
+          if [ "${{ matrix.platform }}" = "linux" ]; then
+            if [ "${{ matrix.arch }}" = "amd64" ]; then
+              ASSET="linux_x86-64.tar.gz"
+            else
+              ASSET="linux_arm64.tar.gz"
+            fi
+          elif [ "${{ matrix.platform }}" = "windows" ]; then
+            ASSET="windows_x86-64.tar.gz"
+          elif [ "${{ matrix.platform }}" = "darwin" ]; then
+            if [ "${{ matrix.arch }}" = "amd64" ]; then
+              ASSET="macos_x86-64.tar.gz"
+            else
+              ASSET="macos_arm64.tar.gz"
+            fi
+          fi
+
+          # Download and extract the latest Go fork
+          curl -L "https://github.com/TheGB0077/encore-go/releases/latest/download/${ASSET}" | tar -C encore-go -xzf -
+
+          echo "Go fork downloaded to encore-go/"
+          ls -la encore-go/
 
       - name: Build
-        run: task ${{ matrix.platform }}:build
+        run: task ${{ matrix.platform }}:build:${{ matrix.arch }}
         shell: bash
         env:
           VERSION: "${{ steps.version.outputs.version }}"
-          ENCORE_GO_VERSION: "${{ steps.encorego.outputs.encorego_version }}"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: encore-${{ matrix.platform }}
+          name: encore-${{ matrix.platform }}_${{ matrix.arch }}
           path: |
-            dist/encore-${{ matrix.platform }}/
-            dist/encore-*.tar.gz
-            dist/encore-*.zip
+            dist/
           retention-days: 30
 
   release:
