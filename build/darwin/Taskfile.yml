@@ -37,6 +37,7 @@ tasks:
       - cp -r encore-go/* {{.BIN_DIR}}/encore-darwin-amd64/encore-go/ 2>/dev/null || true
       - cp LICENSE* {{.BIN_DIR}}/encore-darwin-amd64/ 2>/dev/null || true
       - cp README* {{.BIN_DIR}}/encore-darwin-amd64/ 2>/dev/null || true
+      - mkdir -p {{.BIN_DIR}}/encore-darwin-amd64/runtimes/
       - cp -r runtimes/* {{.BIN_DIR}}/encore-darwin-amd64/runtimes/ 2>/dev/null || true
     env:
       GOOS: darwin
@@ -81,6 +82,7 @@ tasks:
       - cp -r encore-go/* {{.BIN_DIR}}/encore-darwin-arm64/encore-go/ 2>/dev/null || true
       - cp LICENSE* {{.BIN_DIR}}/encore-darwin-arm64/ 2>/dev/null || true
       - cp README* {{.BIN_DIR}}/encore-darwin-arm64/ 2>/dev/null || true
+      - mkdir -p {{.BIN_DIR}}/encore-darwin-arm64/runtimes/
       - cp -r runtimes/* {{.BIN_DIR}}/encore-darwin-arm64/runtimes/ 2>/dev/null || true
     env:
       GOOS: darwin
