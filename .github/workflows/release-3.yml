@@ -88,23 +88,23 @@ jobs:
       - name: Create archives
         shell: bash
         run: |
-          cd dist/encore-${{ matrix.platform }}_${{ matrix.arch }}
+          cd dist/encore-${{ matrix.platform }}-${{ matrix.arch }}
           
           # Create tar.gz with version in name for all platforms
-          tar -czf ../../encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}_${{ matrix.arch }}.tar.gz .
+          tar -czf ../../encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz .
           
           # Create zip for Windows with version in name
           if [[ "${{ matrix.platform }}" == "windows" ]]; then
-            zip -r ../../encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}_${{ matrix.arch }}.zip .
+            zip -r ../../encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.zip .
           fi
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: encore-${{ matrix.platform }}_${{ matrix.arch }}
+          name: encore-${{ matrix.platform }}-${{ matrix.arch }}
           path: |
-            encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}_${{ matrix.arch }}.tar.gz
-            encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}_${{ matrix.arch }}.zip
+            encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
+            encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.zip
           retention-days: 30
 
   release:
@@ -158,11 +158,11 @@ jobs:
             ```
 
             ### Downloads
-            - **Linux AMD64**: `encore-${{ steps.version.outputs.version }}-linux_amd64.tar.gz`
-            - **Linux ARM64**: `encore-${{ steps.version.outputs.version }}-linux_arm64.tar.gz`
-            - **macOS AMD64**: `encore-${{ steps.version.outputs.version }}-darwin_amd64.tar.gz`
-            - **macOS ARM64**: `encore-${{ steps.version.outputs.version }}-darwin_arm64.tar.gz`
-            - **Windows**: `encore-${{ steps.version.outputs.version }}-windows_amd64.tar.gz` (and `.zip`)
+            - **Linux AMD64**: `encore-${{ steps.version.outputs.version }}-linux-amd64.tar.gz`
+            - **Linux ARM64**: `encore-${{ steps.version.outputs.version }}-linux-arm64.tar.gz`
+            - **macOS AMD64**: `encore-${{ steps.version.outputs.version }}-darwin-amd64.tar.gz`
+            - **macOS ARM64**: `encore-${{ steps.version.outputs.version }}-darwin-arm64.tar.gz`
+            - **Windows**: `encore-${{ steps.version.outputs.version }}-windows-amd64.tar.gz` (and `.zip`)
 
             ### Changelog
             TODO: Add changelog entries
