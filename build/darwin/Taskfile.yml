@@ -11,7 +11,6 @@ tasks:
     cmds:
       - task: build:amd64
       - task: build:arm64
-      - task: create:universal
 
   build:amd64:
     summary: Builds Encore for macOS AMD64
@@ -38,6 +37,7 @@ tasks:
       - cp -r encore-go/* {{.BIN_DIR}}/encore-darwin-amd64/encore-go/ 2>/dev/null || true
       - cp LICENSE* {{.BIN_DIR}}/encore-darwin-amd64/ 2>/dev/null || true
       - cp README* {{.BIN_DIR}}/encore-darwin-amd64/ 2>/dev/null || true
+      - cp -r runtimes/* {{.BIN_DIR}}/encore-darwin-amd64/runtimes/ 2>/dev/null || true
     env:
       GOOS: darwin
       GOARCH: amd64
@@ -81,6 +81,7 @@ tasks:
       - cp -r encore-go/* {{.BIN_DIR}}/encore-darwin-arm64/encore-go/ 2>/dev/null || true
       - cp LICENSE* {{.BIN_DIR}}/encore-darwin-arm64/ 2>/dev/null || true
       - cp README* {{.BIN_DIR}}/encore-darwin-arm64/ 2>/dev/null || true
+      - cp -r runtimes/* {{.BIN_DIR}}/encore-darwin-arm64/runtimes/ 2>/dev/null || true
     env:
       GOOS: darwin
       GOARCH: arm64
@@ -95,20 +96,7 @@ tasks:
     deps:
       - task: build
 
-  create:universal:
-    summary: Creates universal macOS binary
-    deps:
-      - task: build:components
-        vars:
-          ARCH: amd64
-    cmds:
-      - mkdir -p {{.BIN_DIR}}/encore-darwin-universal/bin
-      - lipo -create -output {{.BIN_DIR}}/encore-darwin-universal/bin/encore {{.BIN_DIR}}/encore-darwin-amd64/bin/encore {{.BIN_DIR}}/encore-darwin-arm64/bin/encore
-      - lipo -create -output {{.BIN_DIR}}/encore-darwin-universal/bin/git-remote-encore {{.BIN_DIR}}/encore-darwin-amd64/bin/git-remote-encore {{.BIN_DIR}}/encore-darwin-arm64/bin/git-remote-encore
-      - lipo -create -output {{.BIN_DIR}}/encore-darwin-universal/bin/tsbundler-encore {{.BIN_DIR}}/encore-darwin-amd64/bin/tsbundler-encore {{.BIN_DIR}}/encore-darwin-arm64/bin/tsbundler-encore
-      - cp -r encore-go/* {{.BIN_DIR}}/encore-darwin-universal/encore-go/ 2>/dev/null || true
-      - cp LICENSE* {{.BIN_DIR}}/encore-darwin-universal/ 2>/dev/null || true
-      - cp README* {{.BIN_DIR}}/encore-darwin-universal/ 2>/dev/null || true
+
 
   # Build additional components for macOS
   build:components:

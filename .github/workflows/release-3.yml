@@ -125,11 +125,6 @@ jobs:
           
           # Create tar.gz with version in name for all platforms
           tar -czf ../../encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz .
-          
-          # Create zip for Windows with version in name
-          if [[ "${{ matrix.platform }}" == "windows" ]]; then
-            zip -r ../../encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.zip .
-          fi
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -137,7 +132,6 @@ jobs:
           name: encore-${{ matrix.platform }}-${{ matrix.arch }}
           path: |
             encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
-            encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.zip
           retention-days: 30
 
   release:
@@ -195,7 +189,7 @@ jobs:
             - **Linux ARM64**: `encore-${{ steps.version.outputs.version }}-linux-arm64.tar.gz`
             - **macOS AMD64**: `encore-${{ steps.version.outputs.version }}-darwin-amd64.tar.gz`
             - **macOS ARM64**: `encore-${{ steps.version.outputs.version }}-darwin-arm64.tar.gz`
-            - **Windows**: `encore-${{ steps.version.outputs.version }}-windows-amd64.tar.gz` (and `.zip`)
+            - **Windows**: `encore-${{ steps.version.outputs.version }}-windows-amd64.tar.gz`
 
             ### Changelog
             TODO: Add changelog entries
