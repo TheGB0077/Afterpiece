@@ -19,8 +19,8 @@ jobs:
           - { platform: linux, os: ubuntu-24.04, arch: amd64 }
           - { platform: linux, os: ubuntu-24.04, arch: arm64 }
           - { platform: windows, os: windows-latest, arch: amd64 }
-          - { platform: darwin, os: macos-15, arch: amd64 }
-          - { platform: darwin, os: macos-15, arch: arm64 }
+          - { platform: darwin, os: ubuntu-24.04, arch: amd64 }
+          - { platform: darwin, os: ubuntu-24.04, arch: arm64 }
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -32,6 +32,39 @@ jobs:
 
       - name: Install tools
         run: mise install
+
+      - name: Setup macOS SDKs for cross-compilation
+        if: matrix.platform == 'darwin'
+        run: |
+          echo "Setting up macOS SDKs for cross-compilation on Ubuntu..."
+          
+          # Create resources directory
+          mkdir -p resources/sdks
+          
+          # Install dependencies for SDK extraction
+          sudo apt-get update
+          sudo apt-get install -y bzip2 xz-utils
+          
+          # Download and extract appropriate SDK based on architecture
+          if [[ "${{ matrix.arch }}" == "amd64" ]]; then
+            echo "Downloading macOS 10.15 SDK for AMD64 builds..."
+            curl -L "https://github.com/alexey-lysiuk/macos-sdk/releases/download/10.15/MacOSX10.15.tar.bz2" | tar -C resources/sdks -xjf -
+            SDK_FULL_PATH="${GITHUB_WORKSPACE}/resources/sdks/MacOSX10.15.sdk"
+            echo "Using macOS 10.15 SDK for AMD64 cross-compilation"
+          else
+            echo "Downloading macOS 11.3 SDK for ARM64 builds..."
+            curl -L "https://github.com/alexey-lysiuk/macos-sdk/releases/download/11.3/MacOSX11.3.tar.bz2" | tar -C resources/sdks -xjf -
+            SDK_FULL_PATH="${GITHUB_WORKSPACE}/resources/sdks/MacOSX11.3.sdk"
+            echo "Using macOS 11.3 SDK for ARM64 cross-compilation"
+          fi
+          
+          # Set MACOS_SDK_PATH to full absolute path
+          echo "MACOS_SDK_PATH=${SDK_FULL_PATH}" >> $GITHUB_ENV
+          echo "SDKROOT=${SDK_FULL_PATH}" >> $GITHUB_ENV
+          echo "SDK path: ${SDK_FULL_PATH}"
+          
+          # Verify SDK installation
+          ls -la ${SDK_FULL_PATH}/
 
       - name: Extract version from tag
         shell: bash
@@ -92,11 +125,6 @@ jobs:
           
           # Create tar.gz with version in name for all platforms
           tar -czf ../../encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz .
-          
-          # Create zip for Windows with version in name
-          if [[ "${{ matrix.platform }}" == "windows" ]]; then
-            zip -r ../../encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.zip .
-          fi
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -104,7 +132,6 @@ jobs:
           name: encore-${{ matrix.platform }}-${{ matrix.arch }}
           path: |
             encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
-            encore-${{ steps.version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}.zip
           retention-days: 30
 
   release:
@@ -162,7 +189,7 @@ jobs:
             - **Linux ARM64**: `encore-${{ steps.version.outputs.version }}-linux-arm64.tar.gz`
             - **macOS AMD64**: `encore-${{ steps.version.outputs.version }}-darwin-amd64.tar.gz`
             - **macOS ARM64**: `encore-${{ steps.version.outputs.version }}-darwin-arm64.tar.gz`
-            - **Windows**: `encore-${{ steps.version.outputs.version }}-windows-amd64.tar.gz` (and `.zip`)
+            - **Windows**: `encore-${{ steps.version.outputs.version }}-windows-amd64.tar.gz`
 
             ### Changelog
             TODO: Add changelog entries
